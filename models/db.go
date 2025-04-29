@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/mattn/go-sqlite3" // Import the SQLite driver
 )
@@ -14,5 +15,30 @@ func InitDB(dataSourceName string) error {
 	if err != nil {
 		return err
 	}
-	return DB.Ping()
+
+	err = DB.Ping()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Connected to DB")
+
+	return migrate()
+}
+
+func migrate() error {
+	usersTable := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT UNIQUE NOT NULL,
+		password_hash TEXT NOT NULL
+	);`
+
+	_, err := DB.Exec(usersTable)
+	if err != nil {
+		return fmt.Errorf("Error creating users table: %w", err)
+	}
+
+	fmt.Println("Users table ready")
+	return nil
 }

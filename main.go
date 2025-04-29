@@ -1,7 +1,9 @@
-package feathershare
+package main
 
 import (
 	"log"
+	"main/handlers"
+	"main/models"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -9,16 +11,27 @@ import (
 )
 
 func main() {
+	//Init DB
+	err := models.InitDB("app.db")
+	if err != nil {
+		log.Fatal("Failed to init DB:", err)
+	}
+
+	//Set up api router
 	r := chi.NewRouter()
 
 	// Middleware
 	r.Use(middleware.Logger)    // Log API calls
 	r.Use(middleware.Recoverer) // Recover from panics
 
-	// Basic test route
-	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"message": "pong"}`))
+	// // Basic test route
+	// r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+	// 	w.Header().Set("Content-Type", "application/json")
+	// 	w.Write([]byte(`{"message": "pong"}`))
+	// })
+	r.Route("/api", func(r chi.Router) {
+		r.Post("/signup", handlers.Signup)
+		r.Post("/login", handlers.Login)
 	})
 
 	// TODO: Add more routes: signup, login, upload, files list, download

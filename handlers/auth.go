@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"feathershare/models"
-	"feathershare/utils"
+	"main/models"
+	"main/utils"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
