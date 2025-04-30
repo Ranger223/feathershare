@@ -4,6 +4,7 @@ import (
 	"log"
 	"main/handlers"
 	"main/models"
+	"main/sessionmiddleware"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -32,6 +33,15 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		r.Post("/signup", handlers.Signup)
 		r.Post("/login", handlers.Login)
+
+		//Secure endpoints
+		r.Group(func(r chi.Router) {
+			r.Use(sessionmiddleware.SessionAuth)
+			r.Post("/logout", handlers.Logout)
+			r.Post("/upload", handlers.UploadFile)
+			// r.Get("/files", handlers.ListFiles)
+			// r.Get("/download/{id}", handlers.DownloadFile)
+		})
 	})
 
 	// TODO: Add more routes: signup, login, upload, files list, download

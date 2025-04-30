@@ -25,3 +25,5 @@ go.work.sum
 .env
 # database file
 app.db
+# uploads folder
+uploads
