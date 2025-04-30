@@ -39,7 +39,7 @@ func main() {
 			r.Use(sessionmiddleware.SessionAuth)
 			r.Post("/logout", handlers.Logout)
 			r.Post("/upload", handlers.UploadFile)
-			// r.Get("/files", handlers.ListFiles)
+			r.Get("/files", handlers.ListFiles)
 			// r.Get("/download/{id}", handlers.DownloadFile)
 		})
 	})

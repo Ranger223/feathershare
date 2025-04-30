@@ -34,7 +34,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = models.DB.Exec("INSERT INTO users (username, password_hash) VALUES (?, ?)", creds.Username, string(hashedPassword))
+	_, err = models.DB.Exec("INSERT INTO users (username, password_hash) VALUES (?, ?, ?)", creds.Username, string(hashedPassword))
 	if err != nil {
 		http.Error(w, "Username already exists", http.StatusBadRequest)
 		return
