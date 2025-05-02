@@ -46,6 +46,10 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		if err := ensureUploadsFolderExists("uploads"); err != nil {
+			fmt.Println("Error:", err)
+		}
+
 		// Generate safe filename
 		timestamp := time.Now().Unix()
 		ext := filepath.Ext(part.FileName())
@@ -83,4 +87,22 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, "No file uploaded", http.StatusBadRequest)
+}
+
+func ensureUploadsFolderExists(path string) error {
+	// Check if the folder exists
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		// Create the folder (and any necessary parent directories)
+		err := os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("failed to create folder: %w", err)
+		}
+		fmt.Println("Uploads folder created.")
+	} else if err != nil {
+		return fmt.Errorf("error checking folder: %w", err)
+	} else {
+		fmt.Println("Uploads folder already exists.")
+	}
+	return nil
 }
