@@ -99,5 +99,21 @@ func migrate() error {
 		return fmt.Errorf("error creating files table: %w", err)
 	}
 
+	logsTable := `
+	CREATE TABLE IF NOT EXISTS logs (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER,
+		file_id INTEGER,
+		action_type TEXT, -- "upload" or "download"
+		timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (file_id) REFERENCES files(id)
+	);`
+
+	_, err = DB.Exec(logsTable)
+	if err != nil {
+		return fmt.Errorf("error creating logs table: %w", err)
+	}
+
 	return nil
 }

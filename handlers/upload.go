@@ -25,7 +25,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-Type")
 	_, params, err := mime.ParseMediaType(contentType)
 	if err != nil || params["boundary"] == "" {
-		http.Error(w, "Invalid Content-Type", http.StatusBadRequest)
+		http.Error(w, `{"error": "Invalid Content-Type"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -37,7 +37,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		if err != nil {
-			http.Error(w, "Error reading part", http.StatusBadRequest)
+			http.Error(w, `{"error": "Error reading part"}`, http.StatusBadRequest)
 			return
 		}
 
@@ -60,7 +60,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		// Create destination file
 		dst, err := os.Create(savePath)
 		if err != nil {
-			http.Error(w, "Could not save file", http.StatusInternalServerError)
+			http.Error(w, `{"error": "Could not save file"}`, http.StatusInternalServerError)
 			return
 		}
 
@@ -69,24 +69,29 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		_, err = io.Copy(buf, part)
 		dst.Close()
 		if err != nil {
-			http.Error(w, "Failed to write file", http.StatusInternalServerError)
+			http.Error(w, `{"error": "Failed to write file"}`, http.StatusInternalServerError)
 			return
 		}
 
 		// Store file metadata in DB
-		_, err = models.DB.Exec(`
+		result, err := models.DB.Exec(`
             INSERT INTO files (user_id, filename, filepath)
             VALUES (?, ?, ?)`, userID, part.FileName(), savePath)
 		if err != nil {
-			http.Error(w, "DB insert failed", http.StatusInternalServerError)
+			http.Error(w, `{"error": "DB insert failed"}`, http.StatusInternalServerError)
 			return
 		}
 
-		w.Write([]byte(fmt.Sprintf(`{"message": "uploaded: %s"}`, part.FileName())))
+		fileID, _ := result.LastInsertId()
+
+		// Log the upload
+		go models.LogAction(userID, int(fileID), "upload")
+
+		w.Write(fmt.Appendf(nil, `{"message": "uploaded: %s"}`, part.FileName()))
 		return // only handling one file per request
 	}
 
-	http.Error(w, "No file uploaded", http.StatusBadRequest)
+	http.Error(w, `{"error": "No filed uploaded"}`, http.StatusBadRequest)
 }
 
 func ensureUploadsFolderExists(path string) error {

@@ -40,7 +40,9 @@ func main() {
 			r.Post("/logout", handlers.Logout)
 			r.Post("/upload", handlers.UploadFile)
 			r.Get("/files", handlers.ListFiles)
-			// r.Get("/download/{id}", handlers.DownloadFile)
+			r.Get("/files/download", handlers.DownloadFile)
+			r.Delete("/files/delete", handlers.DeleteFile)
+			r.Get("/admin/logs", handlers.ListAllLogs)
 		})
 	})
 

@@ -10,6 +10,7 @@ import (
 type contextKey string
 
 const ContextUserID = contextKey("userID")
+const ContextIsAdmin = contextKey("isAdmin")
 
 func SessionAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -20,11 +21,12 @@ func SessionAuth(next http.Handler) http.Handler {
 		}
 
 		var userID int
+		var isAdmin bool
 		var expires time.Time
 		row := models.DB.QueryRow(
-			"SELECT user_id, expires_at From sessions WHERE id = ?", cookie.Value,
+			"SELECT u.id, u.is_admin, s.expires_at FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = ?", cookie.Value,
 		)
-		err = row.Scan(&userID, &expires)
+		err = row.Scan(&userID, &isAdmin, &expires)
 		if err != nil || expires.Before(time.Now()) {
 			http.Error(w, "Session expired or invalid", http.StatusUnauthorized)
 			return
@@ -32,6 +34,7 @@ func SessionAuth(next http.Handler) http.Handler {
 
 		// Add userID to context
 		ctx := context.WithValue(r.Context(), ContextUserID, userID)
+		ctx = context.WithValue(ctx, ContextIsAdmin, isAdmin)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
