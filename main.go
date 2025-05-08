@@ -41,12 +41,10 @@ func main() {
 			r.Post("/upload", handlers.UploadFile)
 			r.Get("/files", handlers.ListFiles)
 			r.Get("/files/download", handlers.DownloadFile)
-			r.Delete("/files/delete", handlers.DeleteFile)
+			r.Delete("/files/delete", handlers.DeleteFiles)
 			r.Get("/admin/logs", handlers.ListAllLogs)
 		})
 	})
-
-	// TODO: Add more routes: signup, login, upload, files list, download
 
 	log.Println("Server running on http://localhost:8080")
 	http.ListenAndServe(":8080", r)
