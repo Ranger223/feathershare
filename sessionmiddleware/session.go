@@ -24,7 +24,7 @@ func SessionAuth(next http.Handler) http.Handler {
 		var isAdmin bool
 		var expires time.Time
 		row := models.DB.QueryRow(
-			"SELECT u.id, u.is_admin, s.expires_at FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = ?", cookie.Value,
+			"SELECT u.id, u.isAdmin, s.expires_at FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = ?", cookie.Value,
 		)
 		err = row.Scan(&userID, &isAdmin, &expires)
 		if err != nil || expires.Before(time.Now()) {

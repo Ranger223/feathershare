@@ -54,6 +54,6 @@ func DownloadFile(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filePath)
 
 	// Log download (optional)
-	go models.LogAction(userID, fileID, "download")
+	go models.LogAction(userID, fileID, fileName, "download")
 
 }

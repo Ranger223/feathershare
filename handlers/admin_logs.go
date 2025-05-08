@@ -40,10 +40,9 @@ func ListAllLogs(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * pageSize
 
 	rows, err := models.DB.Query(`
-        SELECT l.id, l.user_id, l.file_id, f.filename, l.action_type, l.timestamp
-        FROM logs l 
-        JOIN files f ON l.file_id = f.id 
-        ORDER BY l.timestamp DESC 
+        SELECT id, user_id, file_id, file_name, action_type, timestamp 
+        FROM logs 
+        ORDER BY timestamp DESC 
         LIMIT ? OFFSET ?`, pageSize, offset)
 	if err != nil {
 		http.Error(w, `{"error": "Failed to query logs"}`, http.StatusInternalServerError)

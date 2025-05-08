@@ -70,7 +70,7 @@ func DeleteFiles(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Log the deletion
-		go models.LogAction(userID, fileID, "delete")
+		go models.LogAction(userID, fileID, fileName, "delete")
 		deletedFiles = append(deletedFiles, fileName)
 	}
 

@@ -63,9 +63,22 @@ func migrate() error {
 		return fmt.Errorf("error creating admin account")
 	}
 
-	_, err = DB.Exec("INSERT INTO users (username, password_hash, isAdmin) VALUES (?, ?, ?)", adminUser, string(hashedPassword), 1)
+	// Check if an admin user already exists
+	var count int
+	err = DB.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", adminUser).Scan(&count)
 	if err != nil {
-		return fmt.Errorf("error inserting admin user into database")
+		return fmt.Errorf("error checking for admin user")
+	}
+
+	if count == 0 {
+		// Insert admin user if they don't exist
+		_, err = DB.Exec("INSERT INTO users (username, password_hash, isAdmin) VALUES (?, ?, ?)", adminUser, string(hashedPassword), 1)
+		if err != nil {
+			return fmt.Errorf("error inserting admin user into database")
+		}
+		fmt.Println("Admin user created.")
+	} else {
+		fmt.Println("Admin user already exists.")
 	}
 
 	fmt.Println("Users table ready")
@@ -104,10 +117,10 @@ func migrate() error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER,
 		file_id INTEGER,
-		action_type TEXT, -- "upload" or "download"
+		file_name TEXT,
+		action_type TEXT,
 		timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (user_id) REFERENCES users(id),
-		FOREIGN KEY (file_id) REFERENCES files(id)
+		FOREIGN KEY (user_id) REFERENCES users(id)
 	);`
 
 	_, err = DB.Exec(logsTable)

@@ -85,7 +85,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		fileID, _ := result.LastInsertId()
 
 		// Log the upload
-		go models.LogAction(userID, int(fileID), "upload")
+		go models.LogAction(userID, int(fileID), part.FileName(), "upload")
 
 		w.Write(fmt.Appendf(nil, `{"message": "uploaded: %s"}`, part.FileName()))
 		return // only handling one file per request
